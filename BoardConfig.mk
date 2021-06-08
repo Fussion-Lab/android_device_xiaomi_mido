@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-VENDOR_PATH := device/xiaomi/msm8953-common
+DEVICE_PATH := device/xiaomi/mido
 
 # Architecture
 TARGET_ARCH := arm64
@@ -34,17 +34,23 @@ TARGET_BOARD_PLATFORM := msm8953
 # Build
 BUILD_BROKEN_DUP_RULES := true
 
+# Device Properties
+TARGET_ODM_PROP := $(DEVICE_PATH)/odm.prop
+TARGET_PRODUCT_PROP := $(DEVICE_PATH)/product.prop
+TARGET_SYSTEM_EXT_PROP := $(DEVICE_PATH)/system_ext.prop
+TARGET_SYSTEM_PROP := $(DEVICE_PATH)/system.prop
+TARGET_VENDOR_PROP := $(DEVICE_PATH)/vendor.prop
+
 # Kernel
 BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 androidboot.bootdevice=7824900.sdhci earlycon=msm_hsl_uart,0x78af000
 BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
 BOARD_KERNEL_PAGESIZE :=  2048
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01000000 --tags_offset 0x00000100
-TARGET_KERNEL_SOURCE := kernel/xiaomi/msm8953
-ifeq ($(TARGET_KERNEL_VERSION),4.9)
+TARGET_KERNEL_CONFIG := mido_defconfig
+TARGET_KERNEL_SOURCE := kernel/xiaomi/mido
 BOARD_KERNEL_CMDLINE += androidboot.usbconfigfs=true
 TARGET_KERNEL_CLANG_COMPILE := true
-endif
 
 # ANT
 BOARD_ANT_WIRELESS_DEVICE := "vfs-prerelease"
@@ -78,7 +84,7 @@ TARGET_BOOTLOADER_BOARD_NAME := MSM8953
 TARGET_NO_BOOTLOADER := true
 
 # Bluetooth
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(VENDOR_PATH)/bluetooth
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
 BOARD_HAVE_BLUETOOTH_QCOM := true
 BLUETOOTH_HCI_USE_MCT := true
 
@@ -106,8 +112,11 @@ USE_OPENGL_RENDERER := true
 TARGET_ENABLE_MEDIADRM_64 := true
 
 # Filesystem
+TARGET_COPY_OUT_VENDOR := vendor
 TARGET_USERIMAGES_USE_F2FS := true
 TARGET_USERIMAGES_USE_EXT4 := true
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 
 # Fingerprint
 SOONG_CONFIG_NAMESPACES += XIAOMI_MSM8953_BIOMETRICS
@@ -122,15 +131,15 @@ USE_DEVICE_SPECIFIC_GPS := true
 TARGET_NO_RPC := true
 
 # Filesystem
-TARGET_FS_CONFIG_GEN := $(VENDOR_PATH)/config.fs
+TARGET_FS_CONFIG_GEN := $(DEVICE_PATH)/config.fs
 
 # HIDL
-DEVICE_MANIFEST_FILE := $(VENDOR_PATH)/manifest.xml
-DEVICE_MATRIX_FILE   := $(VENDOR_PATH)/compatibility_matrix.xml
+DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
+DEVICE_MATRIX_FILE   := $(DEVICE_PATH)/compatibility_matrix.xml
 
 # Init
-TARGET_INIT_VENDOR_LIB := //$(VENDOR_PATH):libinit_msm8953
-TARGET_RECOVERY_DEVICE_MODULES := libinit_msm8953
+TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_mido
+TARGET_RECOVERY_DEVICE_MODULES := libinit_mido
 
 # Lights
 SOONG_CONFIG_NAMESPACES += XIAOMI_MSM8953_LIGHTS
@@ -144,6 +153,10 @@ BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3221225472
 BOARD_PERSISTIMAGE_PARTITION_SIZE := 33554432
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
+BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 67108864
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 25765043200 # 25765059584 - 16384
+BOARD_VENDORIMAGE_PARTITION_SIZE := 872415232
 BOARD_ROOT_EXTRA_SYMLINKS := \
     /vendor/dsp:/dsp \
     /vendor/firmware_mnt:/firmware \
@@ -154,20 +167,24 @@ TARGET_PER_MGR_ENABLED := true
 
 # Power
 TARGET_USES_INTERACTION_BOOST := true
+TARGET_TAP_TO_WAKE_NODE := "/proc/touchpanel/enable_dt2w"
 
 # Qualcomm
 BOARD_USES_QCOM_HARDWARE := true
 
 # Recovery
-ifeq ($(AB_OTA_UPDATER), true)
-TARGET_RECOVERY_FSTAB := $(VENDOR_PATH)/rootdir/etc/fstab_AB.recovery.qcom
-else
-TARGET_RECOVERY_FSTAB := $(VENDOR_PATH)/rootdir/etc/fstab.recovery.qcom
-endif
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.recovery.qcom
+
+# Treble
+BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
+PRODUCT_COMPATIBILITY_MATRIX_LEVEL_OVERRIDE := 27
+PRODUCT_FULL_TREBLE_OVERRIDE := true
+PRODUCT_SHIPPING_API_LEVEL := 24
+PRODUCT_VENDOR_MOVE_ENABLED := true
 
 # SELinux
 include device/qcom/sepolicy-legacy-um/SEPolicy.mk
-BOARD_VENDOR_SEPOLICY_DIRS += $(VENDOR_PATH)/sepolicy/vendor
+BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 
 # Treble
 PRODUCT_FULL_TREBLE_OVERRIDE := true
@@ -187,4 +204,4 @@ WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
 # Inherit from the proprietary version
-include vendor/xiaomi/msm8953-common/BoardConfigVendor.mk
+include vendor/xiaomi/mido/BoardConfigVendor.mk
